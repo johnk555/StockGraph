@@ -13,7 +13,9 @@ public class StockApiService {
 
     private static final String API_KEY = "f2d595185b98400892f2e6e8fabd8641";
 
-     public String getStockData(String symbol, String startDate, String endDate) {
+     public List<Stock> getStockData(String symbol, String startDate, String endDate) {
+         List<Stock> stocks = new ArrayList<>();
+
         try {
             String urlString = String.format(
                     "https://api.twelvedata.com/time_series?symbol=%s&interval=1day&start_date=%s&end_date=%s&apikey=%s",
@@ -39,10 +41,24 @@ public class StockApiService {
             in.close();
             conn.disconnect();
 
-            return content.toString();
+            JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
+            JsonArray values = json.getAsJsonArray("values");
+
+            for ( int i = 0; i < values.size(); i++){
+                JsonObject value = values.get(i).getAsJsonObject();
+                String date = value.get("datetime").getAsString();
+                double open = value.get("open").getAsDouble();
+                double high = value.get("high").getAsDouble();
+                double low = value.get("low").getAsDouble();
+                double close = value.get("close").getAsDouble();
+                long volume = value.get("volume").getAsLong();
+
+                stocks.add(new Stock(date,open,high,low,close,volume));
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+
+        return stocks;
     }
 }

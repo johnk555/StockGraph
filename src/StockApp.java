@@ -1,11 +1,20 @@
+import com.google.gson.Gson;
+import java.io.Reader;
+import java.util.List;
+
 public class StockApp {
 
     public void run() {
         System.out.println("Stockapp is running...");
 
         StockApiService apiService = new StockApiService();
-        String data = apiService.getStockData("AAPL","2024-01-01","2024-01-31");
+        List<Stock> stocks = apiService.getStockData("MSFT","2024-01-01","2024-01-31");
 
-        System.out.println(data);
+        for (Stock stock : stocks) {
+            System.out.println(stock.getDate() + " | Open: " + stock.getOpen() + " | Close: " + stock.getClose());
+        }
+
+        DatabaseService dbService = new DatabaseService();
+        dbService.saveStocks(stocks, "MSFT");
     }
 }
